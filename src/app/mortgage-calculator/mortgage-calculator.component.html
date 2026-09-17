@@ -1,0 +1,262 @@
+<div class="calculator-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-area">
+      <span class="icon">🏛️</span>
+      <h1>Calcolatore Mutuo</h1>
+    </div>
+    <p class="subtitle">Strumento enterprise per il calcolo dell'ammortamento alla francese</p>
+  </header>
+
+  <div class="main-grid">
+    <!-- Configuration Panel -->
+    <aside class="panel settings-panel">
+      <h2>Parametri del Mutuo</h2>
+      
+      <div class="form-group">
+        <label for="capital">Capitale Erogato (€)</label>
+        <div class="input-wrapper">
+          <span class="prefix">€</span>
+          <input 
+            type="number" 
+            id="capital" 
+            [value]="capital()" 
+            (input)="updateCapital($event)" 
+            min="1000" 
+            max="10000000" 
+            step="5000"
+          />
+        </div>
+        <input 
+          type="range" 
+          [value]="capital()" 
+          (input)="updateCapital($event)" 
+          min="10000" 
+          max="1000000" 
+          step="5000" 
+          class="range-slider"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="rate">Tasso Annuo Nominale (TAN %)</label>
+        <div class="input-wrapper">
+          <input 
+            type="number" 
+            id="rate" 
+            [value]="annualRate()" 
+            (input)="updateRate($event)" 
+            min="0.1" 
+            max="20" 
+            step="0.05"
+          />
+          <span class="suffix">%</span>
+        </div>
+        <input 
+          type="range" 
+          [value]="annualRate()" 
+          (input)="updateRate($event)" 
+          min="0.1" 
+          max="15" 
+          step="0.05" 
+          class="range-slider"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="duration">Durata (Anni)</label>
+        <div class="input-wrapper">
+          <input 
+            type="number" 
+            id="duration" 
+            [value]="durationYears()" 
+            (input)="updateDuration($event)" 
+            min="1" 
+            max="50"
+          />
+          <span class="suffix">Anni</span>
+        </div>
+        <input 
+          type="range" 
+          [value]="durationYears()" 
+          (input)="updateDuration($event)" 
+          min="1" 
+          max="40" 
+          step="1" 
+          class="range-slider"
+        />
+      </div>
+    </aside>
+
+    <!-- Results Panel -->
+    <main class="results-area">
+      <!-- KPI Cards -->
+      <section class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Rata Mensile</span>
+          <span class="kpi-value">{{ monthlyPayment() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span class="kpi-trend">Quota fissa</span>
+        </div>
+
+        <div class="kpi-card highlight">
+          <span class="kpi-label">Totale Interessi</span>
+          <span class="kpi-value text-accent">{{ totalInterest() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span class="kpi-trend">Interessi passivi</span>
+        </div>
+
+        <div class="kpi-card">
+          <span class="kpi-label">Costo Totale</span>
+          <span class="kpi-value">{{ totalCost() | currency:'EUR':'symbol':'1.2-2' }}</span>
+          <span class="kpi-trend">Capitale + Interessi</span>
+        </div>
+      </section>
+
+      <!-- Chart Visualization -->
+      <section class="panel chart-panel">
+        <div class="panel-header">
+          <h3>Andamento Debito Residuo</h3>
+          <span class="chart-legend">
+            <span class="legend-color"></span> Debito Residuo Annuo
+          </span>
+        </div>
+        
+        <div class="chart-container">
+          <svg viewBox="0 0 800 250" class="svg-chart" preserveAspectRatio="none">
+            <!-- Gradients definitions -->
+            <defs>
+              <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--primary-color)" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="var(--primary-color)" stop-opacity="0.0" />
+              </linearGradient>
+            </defs>
+
+            <!-- Grid Lines -->
+            @for (y of chartGridLines(); track y) {
+              <line x1="20" [attr.y1]="y" x2="780" [attr.y2]="y" class="grid-line" />
+            }
+
+            <!-- Area Path -->
+            <polygon [attr.points]="chartAreaPoints()" fill="url(#chartGradient)" />
+
+            <!-- Line Path -->
+            <polyline [attr.points]="chartPoints()" fill="none" stroke="var(--primary-color)" stroke-width="3" />
+
+            <!-- Interactive Points -->
+            @for (d of annualSchedule(); track d.year; let index = $index) {
+              @if (annualSchedule().length > 0) {
+                <circle 
+                  [attr.cx]="(index / (annualSchedule().length - 1)) * 760 + 20" 
+                  [attr.cy]="250 - (d.remainingDebt / capital()) * 210 - 20" 
+                  r="6" 
+                  [class.active]="hoveredIndex() === index"
+                  (mouseenter)="hoveredIndex.set(index)"
+                  (mouseleave)="hoveredIndex.set(null)"
+                  class="chart-dot" 
+                />
+              }
+            }
+          </svg>
+
+          @if (hoveredIndex() !== null && annualSchedule()[hoveredIndex()!]) {
+            @let activeIndex = hoveredIndex()!;
+            @let activeYear = annualSchedule()[activeIndex];
+            <div
+              class="chart-point-tooltip"
+              [style.left.%]="(((activeIndex / (annualSchedule().length - 1)) * 760 + 20) / 800) * 100"
+              [style.top.%]="((250 - (activeYear.remainingDebt / capital()) * 210 - 20) / 250) * 100"
+            >
+              <span>Anno <strong>{{ activeYear.year }}</strong></span>
+              <span>Debito residuo: <strong>{{ activeYear.remainingDebt | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+              <span>Interessi pagati: <strong>{{ activeYear.interestQuota | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+            </div>
+          }
+        </div>
+
+        <!-- Tooltip overlay or stats overlay based on hover -->
+        <div class="chart-tooltip-panel">
+          @if (hoveredIndex() !== null && annualSchedule()[hoveredIndex()!]) {
+            @let activeYear = annualSchedule()[hoveredIndex()!];
+            <div class="tooltip-data">
+              <span>Anno <strong>{{ activeYear.year }}</strong></span>
+              <span>Debito Residuo: <strong>{{ activeYear.remainingDebt | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+              <span>Interessi Pagati: <strong>{{ activeYear.interestQuota | currency:'EUR':'symbol':'1.2-2' }}</strong></span>
+            </div>
+          } @else {
+            <span class="tooltip-hint">Passa il mouse sopra i punti del grafico per dettagli sull'anno</span>
+          }
+        </div>
+      </section>
+
+      <!-- Amortization Schedule Table -->
+      <section class="panel table-panel">
+        <div class="panel-header table-actions">
+          <h3>Piano di Ammortamento</h3>
+          <div class="view-toggle">
+            <button 
+              [class.active]="selectedView() === 'annual'" 
+              (click)="selectedView.set('annual')">
+              Annuale
+            </button>
+            <button 
+              [class.active]="selectedView() === 'monthly'" 
+              (click)="selectedView.set('monthly')">
+              Mensile
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          @if (selectedView() === 'annual') {
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Anno</th>
+                  <th>Quota Capitale</th>
+                  <th>Quota Interessi</th>
+                  <th>Rata Totale</th>
+                  <th>Debito Residuo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of annualSchedule(); track row.year) {
+                  <tr>
+                    <td><strong>Anno {{ row.year }}</strong></td>
+                    <td>{{ row.principalQuota | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td>{{ row.interestQuota | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td>{{ row.payment | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td class="text-semibold">{{ row.remainingDebt | currency:'EUR':'symbol':'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Mese</th>
+                  <th>Anno</th>
+                  <th>Quota Capitale</th>
+                  <th>Quota Interessi</th>
+                  <th>Rata Totale</th>
+                  <th>Debito Residuo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of schedule(); track row.period) {
+                  <tr>
+                    <td>Mese {{ row.period }}</td>
+                    <td>Anno {{ row.year }}</td>
+                    <td>{{ row.principalQuota | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td>{{ row.interestQuota | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td>{{ row.payment | currency:'EUR':'symbol':'1.2-2' }}</td>
+                    <td class="text-semibold">{{ row.remainingDebt | currency:'EUR':'symbol':'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
