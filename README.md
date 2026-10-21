@@ -1,59 +1,43 @@
-# MyApp
+# Mortgage Calculator
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.2.
+Angular 22 application for calculating French amortization mortgages. Built following enterprise-grade Angular best practices.
 
-## Development server
+## Stack
 
-To start a local development server, run:
+- **Angular 22** - Standalone components with Signals
+- **TypeScript** - Strict mode typization
+- **SCSS** - Enterprise-grade styling
 
-```bash
-ng serve
-```
+## Development
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Prerequisites
 
-## Code scaffolding
+- Node.js 20+
+- Angular CLI 22
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Running the app
 
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+The application will be available at `http://localhost:4200/`.
 
-To build the project run:
+### Building
 
 ```bash
-ng build
+npm run build
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Output will be in the `dist/` directory.
 
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Running tests
 
 ```bash
-ng test
+npm test
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
+For unit tests with Vitest coverage:
 ```bash
-ng e2e
+npm test -- --codeCoverage
 ```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
