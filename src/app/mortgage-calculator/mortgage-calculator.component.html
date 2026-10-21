@@ -260,3 +260,13 @@
     </main>
   </div>
 </div>
+
+<button
+  type="button"
+  class="theme-toggle"
+  [attr.aria-pressed]="isAlternateTheme()"
+  [attr.aria-label]="isAlternateTheme() ? 'Ripristina i colori predefiniti' : 'Attiva la palette alternativa'"
+  (click)="toggleTheme()">
+  <span class="theme-toggle-icon" aria-hidden="true">◐</span>
+  <span>{{ isAlternateTheme() ? 'Colori originali' : 'Cambia colori' }}</span>
+</button>

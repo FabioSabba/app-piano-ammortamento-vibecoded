@@ -8,6 +8,9 @@
   --text-main: #0f172a;
   --text-muted: #64748b;
   --accent-color: #be123c; /* Rose accent */
+  --control-bg: #f1f5f9;
+  --table-head-bg: #f8fafc;
+  --table-hover-bg: #f8fafc;
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -21,6 +24,21 @@
   min-height: 100vh;
   padding: 2rem 1.5rem;
   box-sizing: border-box;
+}
+
+:host.alternate-theme {
+  --primary-color: #4338ca;
+  --primary-light: #6366f1;
+  --primary-bg: #eef2ff;
+  --bg-color: #f5f3ff;
+  --panel-bg: #ffffff;
+  --border-color: #ddd6fe;
+  --text-main: #1e1b4b;
+  --text-muted: #6b7280;
+  --accent-color: #db2777;
+  --control-bg: #f5f3ff;
+  --table-head-bg: #f5f3ff;
+  --table-hover-bg: #eef2ff;
 }
 
 .calculator-container {
@@ -123,7 +141,7 @@
 .input-wrapper {
   display: flex;
   align-items: center;
-  background: #f1f5f9;
+  background: var(--control-bg);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 0.25rem 0.75rem;
@@ -339,7 +357,7 @@
 }
 
 .view-toggle {
-  background: #f1f5f9;
+  background: var(--control-bg);
   padding: 0.25rem;
   border-radius: 8px;
   display: flex;
@@ -359,7 +377,7 @@
 }
 
 .view-toggle button.active {
-  background: #ffffff;
+  background: var(--panel-bg);
   color: var(--text-main);
   box-shadow: var(--shadow-sm);
 }
@@ -385,7 +403,7 @@
 }
 
 .data-table th {
-  background: #f8fafc;
+  background: var(--table-head-bg);
   font-weight: 600;
   color: var(--text-muted);
   position: sticky;
@@ -395,9 +413,52 @@
 }
 
 .data-table tbody tr:hover {
-  background: #f8fafc;
+  background: var(--table-hover-bg);
 }
 
 .text-semibold {
   font-weight: 600;
+}
+
+.theme-toggle {
+  position: fixed;
+  z-index: 10;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  background: var(--primary-color);
+  border: 1px solid color-mix(in srgb, var(--primary-color), #000000 18%);
+  border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.theme-toggle:focus-visible {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 3px;
+}
+
+.theme-toggle-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .theme-toggle {
+    bottom: 1rem;
+    left: 1rem;
+  }
 }

@@ -8,7 +8,10 @@ import { MortgageCalculatorService, Installment, AnnualSummary } from '../mortga
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './mortgage-calculator.component.html',
-  styleUrl: './mortgage-calculator.component.css'
+  styleUrl: './mortgage-calculator.component.css',
+  host: {
+    '[class.alternate-theme]': 'isAlternateTheme()'
+  }
 })
 export class MortgageCalculatorComponent {
   private calculatorService = inject(MortgageCalculatorService);
@@ -21,6 +24,7 @@ export class MortgageCalculatorComponent {
   // UI signals
   selectedView = signal<'annual' | 'monthly'>('annual');
   hoveredIndex = signal<number | null>(null);
+  isAlternateTheme = signal(false);
 
   // Computed results
   mortgagePlan = computed(() => {
@@ -101,5 +105,9 @@ export class MortgageCalculatorComponent {
   updateDuration(event: Event) {
     const val = (event.target as HTMLInputElement).valueAsNumber;
     this.durationYears.set(isNaN(val) ? 0 : val);
+  }
+
+  toggleTheme() {
+    this.isAlternateTheme.update((isActive) => !isActive);
   }
 }
